@@ -8,6 +8,9 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 
+from fcm_django.models import FCMDevice
+from firebase_admin.messaging import Message, Notification
+
 
 # Create your views here.
 @api_view(["POST"])
@@ -48,3 +51,18 @@ class CustomLogin(ObtainAuthToken):
         user = serializer.validated_data["user"]
         token, _ = Token.objects.get_or_create(user=user)
         return Response({"token": token.key})
+
+
+# send notification to a user (by FCM device id?)
+@api_view(["POST"])
+def send_notification(request):
+    FCMDevice.objects.send_message(
+        Message(
+            notification=Notification(title="title", body="body", image="image_url")
+        )
+    )
+    return Response(
+        {"message": "Message Sent!"}, status=status.HTTP_204_NO_CONTENT
+    )
+
+# ToDo: get all notifications of a user and set status to read
